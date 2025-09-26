@@ -1,3 +1,4 @@
+# ssh_handler.py
 import paramiko
 import sys
 import time
@@ -14,12 +15,11 @@ class FixedSSHHandler:
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             
-            # ПРАВИЛЬНЫЙ ВЫЗОВ - передаем параметры как именованные аргументы
             self.client.connect(
-                hostname=host,      # явно указываем hostname
-                username=username,  # явно указываем username  
-                password=password,  # явно указываем password
-                port=port           # явно указываем port
+                hostname=host,
+                username=username,
+                password=password,
+                port=port
             )
             
             self.is_connected = True
@@ -41,8 +41,6 @@ class FixedSSHHandler:
         
         try:
             stdin, stdout, stderr = self.client.exec_command(command)
-            
-            # Ждем завершения команды
             exit_status = stdout.channel.recv_exit_status()
             output = stdout.read().decode('utf-8', errors='ignore')
             error = stderr.read().decode('utf-8', errors='ignore')
@@ -57,114 +55,6 @@ class FixedSSHHandler:
         except Exception as e:
             return {"error": f"Ошибка выполнения: {e}"}
     
-    def interactive_session(self):
-        """Интерактивная сессия"""
-        if not self.is_connected:
-            print("Сначала подключитесь к серверу")
-            return
-        
-        print("\n🎮 Интерактивная SSH сессия")
-        print("Команды:")
-        print("  help - показать справку")
-        print("  exit - выйти")
-        print("  download <remote> <local> - скачать файл")
-        print("  upload <local> <remote> - загрузить файл")
-        print("-" * 50)
-        
-        while self.is_connected:
-            try:
-                command = input("\nssh> ").strip()
-                
-                if not command:
-                    continue
-                
-                if command.lower() == 'exit':
-                    break
-                elif command.lower() == 'help':
-                    self.show_help()
-                elif command.lower().startswith('download '):
-                    self.handle_download(command)
-                elif command.lower().startswith('upload '):
-                    self.handle_upload(command)
-                else:
-                    result = self.execute_command(command)
-                    self.print_result(result)
-                    
-            except KeyboardInterrupt:
-                print("\nСессия прервана")
-                break
-            except Exception as e:
-                print(f"Ошибка: {e}")
-    
-    def show_help(self):
-        """Показать справку"""
-        help_text = """
-📋 Доступные команды:
-• Любые Linux команды: ls, cd, pwd, cat, grep, find, etc.
-• help - показать эту справку
-• exit - выйти из сессии
-• download <remote_path> <local_path> - скачать файл
-• upload <local_path> <remote_path> - загрузить файл
-
-Примеры:
-  ls -la /home
-  cat /etc/passwd
-  ps aux | grep ssh
-  download /var/log/syslog ./syslog.txt
-  upload script.sh /tmp/script.sh
-        """
-        print(help_text)
-    
-    def handle_download(self, command: str):
-        """Скачивание файла с сервера"""
-        try:
-            parts = command.split()
-            if len(parts) != 3:
-                print("Использование: download <remote_path> <local_path>")
-                return
-            
-            remote_path, local_path = parts[1], parts[2]
-            sftp = self.client.open_sftp()
-            sftp.get(remote_path, local_path)
-            sftp.close()
-            print(f"Файл {remote_path} скачан как {local_path}")
-        except Exception as e:
-            print(f"Ошибка скачивания: {e}")
-    
-    def handle_upload(self, command: str):
-        """Загрузка файла на сервер"""
-        try:
-            parts = command.split()
-            if len(parts) != 3:
-                print("Использование: upload <local_path> <remote_path>")
-                return
-            
-            local_path, remote_path = parts[1], parts[2]
-            if not os.path.exists(local_path):
-                print(f"Локальный файл не найден: {local_path}")
-                return
-            
-            sftp = self.client.open_sftp()
-            sftp.put(local_path, remote_path)
-            sftp.close()
-            print(f"Файл {local_path} загружен как {remote_path}")
-        except Exception as e:
-            print(f"Ошибка загрузки: {e}")
-    
-    def print_result(self, result: dict):
-        """Печать результата выполнения команды"""
-        if "error" in result:
-            print(f"Ошибка: {result['error']}")
-        else:
-            if result.get("output"):
-                print("Результат:")
-                print(result["output"].strip())
-            if result.get("error"):
-                print("Ошибки:")
-                print(result["error"].strip())
-            if result.get("exit_status") != 0:
-                print(f"Код выхода: {result['exit_status']}")
-    
     def disconnect(self):
         """Отключение от сервера"""
         if self.client:
@@ -172,52 +62,119 @@ class FixedSSHHandler:
         self.is_connected = False
         print("🔌 Отключено от сервера")
 
-# Функция для получения данных подключения
-def get_connection_info():
-    """Запрос данных для подключения"""
-    print("=== SSH Подключение ===")
-    
-    host = input("Введите IP адрес или hostname: ").strip()
-    if not host:
-        host = "localhost"  # значение по умолчанию
-    
-    username = input("Введите имя пользователя: ").strip()
-    if not username:
-        username = "root"  # значение по умолчанию
-    
-    password = input("Введите пароль: ").strip()
-    
-    port_str = input("Введите порт (по умолчанию 22): ").strip()
-    port = int(port_str) if port_str else 22
-    
-    return host, username, password, port
+def get_open_ports(ip: str) -> list:
+    """
+    Функция для сканирования открытых портов
+    (заглушка - нужно реализовать или импортировать реальную функцию)
+    """
+    # Заглушка - возвращаем стандартные SSH порты
+    # В реальности здесь должно быть сканирование портов
+    return [22, 80, 443, 8080]  # Пример открытых портов
 
-# Основная функция
-def main():
-    print("Исправленный SSH клиент")
+def ssh_connect_and_scan(ip: str, login: str, password: str):
+    """
+    Основная функция для подключения по SSH и выполнения команд
+    """
+    # Получаем открытые порты
+    open_ports = get_open_ports(ip)
     
-    # Выбор режима
-    '''print("\nВыберите режим:")
-    print("1. Простой тест подключения")
-    print("2. Интерактивная сессия")
+    print(f"\nДанные для подключения:")
+    print(f"IP: {ip}")
+    print(f"Логин: {login}")
+    print(f"Пароль: {password}")
+    print(f"Открытые порты: {open_ports}")
     
-    choice = input("Ваш выбор (1-2): ").strip()'''
+    # Создаем SSH хендлер
+    ssh_handler = FixedSSHHandler()
     
-    # Получаем данные подключения
-    host, username, password, port = get_connection_info()
+    # Пытаемся подключиться к стандартному SSH порту (22)
+    if ssh_handler.connect(ip, login, password, 22):
+        print("\nПодключение установлено! Выполняем базовые команды...")
+        
+        # Выполняем системные команды для сбора информации
+        commands = [
+            "uname -a",
+            "whoami",
+            "pwd",
+            "ls -la",
+            "cat /etc/os-release || lsb_release -a || uname -o"
+        ]
+        
+        for cmd in commands:
+            print(f"\n--- Выполняем: {cmd} ---")
+            result = ssh_handler.execute_command(cmd)
+            
+            if result.get("output"):
+                print(result["output"])
+            if result.get("error"):
+                print(f"Ошибка: {result['error']}")
+        
+        # Предлагаем интерактивный режим
+        response = input("\nПерейти в интерактивный режим? (y/n): ").strip().lower()
+        if response == 'y':
+            start_interactive_session(ssh_handler)
     
-    '''if choice == "1":
-        # Простой тест
-        ssh = SimpleSSHHandler()
-        if ssh.connect(host, username, password, port):
-            ssh.test_connection()
-            ssh.disconnect()
-    else:'''
-        # Интерактивная сессия
-    ssh = FixedSSHHandler()
-    if ssh.connect(host, username, password, port):
-        ssh.interactive_session()
-        ssh.disconnect()
+    else:
+        print("❌ Не удалось подключиться по SSH")
+    
+    # Закрываем соединение
+    ssh_handler.disconnect()
 
-if __name__ == "__main__":
-    main()
+def start_interactive_session(ssh_handler):
+    """Запуск интерактивной SSH сессии"""
+    print("\n🎮 Интерактивная SSH сессия")
+    print("Команды: help - справка, exit - выход")
+    print("-" * 50)
+    
+    while ssh_handler.is_connected:
+        try:
+            command = input("\nssh> ").strip()
+            
+            if not command:
+                continue
+            
+            if command.lower() == 'exit':
+                break
+            elif command.lower() == 'help':
+                print_help()
+            else:
+                result = ssh_handler.execute_command(command)
+                print_result(result)
+                
+        except KeyboardInterrupt:
+            print("\nСессия прервана")
+            break
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+def print_help():
+    """Показать справку по командам"""
+    help_text = """
+Доступные команды:
+• Любые Linux команды: ls, cd, pwd, cat, grep, find, ps, etc.
+• help - показать справку
+• exit - выйти из сессии
+
+Примеры:
+  ls -la /home
+  cat /etc/passwd
+  ps aux | grep ssh
+  df -h
+  free -m
+  netstat -tuln
+    """
+    print(help_text)
+
+def print_result(result: dict):
+    """Печать результата выполнения команды"""
+    if "error" in result:
+        print(f"❌ Ошибка: {result['error']}")
+    else:
+        if result.get("output"):
+            print("Результат:")
+            print(result["output"].strip())
+        if result.get("error"):
+            print("Ошибки:")
+            print(result["error"].strip())
+        if result.get("exit_status") != 0:
+            print(f"Код выхода: {result['exit_status']}")
