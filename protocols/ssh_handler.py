@@ -110,12 +110,12 @@ def ssh_connect_and_scan(ip: str, login: str, password: str):
                 print(f"Ошибка: {result['error']}")
         
         # Предлагаем интерактивный режим
-        response = input("\nПерейти в интерактивный режим? (y/n): ").strip().lower()
-        if response == 'y':
-            start_interactive_session(ssh_handler)
+#        response = input("\nПерейти в интерактивный режим? (y/n): ").strip().lower()
+#        if response == 'y':
+        start_interactive_session(ssh_handler)
     
     else:
-        print("❌ Не удалось подключиться по SSH")
+        print("Не удалось подключиться по SSH")
     
     # Закрываем соединение
     ssh_handler.disconnect()

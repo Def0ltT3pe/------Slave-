@@ -1,5 +1,5 @@
 from scanner.scanner import get_open_ports
-from protocols.ssh_handler import ssh_connect_and_scan
+from protocols.ssh_simple_handler import ssh_connect
 from protocols.rdp_simple_handler import simple_rdp
 
 def main():
@@ -26,8 +26,7 @@ def main():
             print("Ошибка RDP")
     elif 22 in open_ports:
         print("\nЗапускаем SSH подключение...")
-        from protocols.ssh_handler import ssh_connect_and_scan
-        ssh_connect_and_scan(ip, login, password)
+        ssh_connect(ip, login, password)
     else:
         print("\nНет доступных протоколов")
 
