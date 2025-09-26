@@ -1,6 +1,6 @@
 from scanner.scanner import get_open_ports
-from protocols.ssh_simple_handler import ssh_connect
-from protocols.rdp_simple_handler import simple_rdp
+from protocols.ssh_simple_connect import ssh_connect
+from protocols.rdp_simple_connect import rdp_connect
 
 def main():
     # Ввод данных для подключения
@@ -20,7 +20,7 @@ def main():
 
     if 3389 in open_ports:
         print("\nЗапускаем RDP подключение...")
-        if simple_rdp(ip, login, password):
+        if rdp_connect(ip, login, password):
             print("RDP запущен!")
         else:
             print("Ошибка RDP")
