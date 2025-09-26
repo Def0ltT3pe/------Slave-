@@ -15,7 +15,7 @@ def get_open_ports(ip: str) -> list:
     """Создает переменную с открытыми портами IP"""
     ports = [21, 22, 23, 80, 443, 3389, 5900]
     
-    print(f"Сканируем {ip}...")
+#    print(f"Сканируем {ip}...")
     
     open_ports = []
     
@@ -24,6 +24,8 @@ def get_open_ports(ip: str) -> list:
             open_ports.append(port)
     
     return open_ports
+
+from protocols.ssh_handler import ssh_connect_and_scan
 
 def main():
     # Ввод данных для подключения
@@ -40,6 +42,8 @@ def main():
     print(f"Логин: {login}")
     print(f"Пароль: {password}")
     print(f"Открытые порты: {open_ports}")
+
+    ssh_connect_and_scan(ip, login, password)
 
 if __name__ == "__main__":
     main()
