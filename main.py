@@ -1,31 +1,7 @@
-import socket
 
-def check_port(ip: str, port: int) -> bool:
-    """Проверка открытых портов"""
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(2)
-        result = sock.connect_ex((ip, port))
-        sock.close()
-        return result == 0
-    except:
-        return False
-
-def get_open_ports(ip: str) -> list:
-    """Создает переменную с открытыми портами IP"""
-    ports = [21, 22, 23, 80, 443, 3389, 5900]
-    
-#    print(f"Сканируем {ip}...")
-    
-    open_ports = []
-    
-    for port in ports:
-        if check_port(ip, port):
-            open_ports.append(port)
-    
-    return open_ports
-
+from scanner.scanner import get_open_ports
 from protocols.ssh_handler import ssh_connect_and_scan
+from protocols.rdp_simple_handler import simple_rdp
 
 def main():
     # Ввод данных для подключения
@@ -43,7 +19,18 @@ def main():
     print(f"Пароль: {password}")
     print(f"Открытые порты: {open_ports}")
 
-    ssh_connect_and_scan(ip, login, password)
+    if 3389 in open_ports:
+        print("\nЗапускаем RDP подключение...")
+        if simple_rdp(ip, login, password):
+            print("✅ RDP запущен!")
+        else:
+            print("❌ Ошибка RDP")
+    elif 22 in open_ports:
+        print("\nЗапускаем SSH подключение...")
+        from protocols.ssh_handler import ssh_connect_and_scan
+        ssh_connect_and_scan(ip, login, password)
+    else:
+        print("\nНет доступных протоколов")
 
 if __name__ == "__main__":
     main()
