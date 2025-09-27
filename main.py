@@ -1,6 +1,7 @@
 from scanner.scanner import get_open_ports
-from protocols.ssh_simple_connect import ssh_connect
-from protocols.rdp_simple_connect import rdp_connect
+from protocols.ssh_connect import ssh_connect
+from protocols.rdp_connect import rdp_connect
+from protocols.vnc_connect import vnc_connect
 #from protocols.http_connect import http_connect
 
 def main():
@@ -25,9 +26,13 @@ def main():
             print("RDP запущен!")
         else:
             print("Ошибка RDP")
+    elif 5900 in open_ports:
+        print("\nЗапускаем VNC подключение...")
+        vnc_connect(ip, password)
     elif 22 in open_ports:
         print("\nЗапускаем SSH подключение...")
         ssh_connect(ip, login, password)
+    
 #   elif 80 in open_ports:
 #       print("\nЗапускаем HTTP подключение...")
 #       http_connect(ip)
