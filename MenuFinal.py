@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox, scrolledtext
 import threading
 import paramiko
 from scanner.scanner import get_open_ports
-from protocols.rdp_simple_handler import simple_rdp
+from protocols.rdp_connect import rdp_connect
 
 class NetworkScanner:
     def __init__(self, root):
@@ -139,7 +139,7 @@ class NetworkScanner:
         self.status_var.set("Подключение RDP...")
         
         try:
-            success = simple_rdp(ip, login, password)
+            success = rdp_connect(ip, login, password)
             if success:
                 self.status_var.set("RDP подключен")
                 messagebox.showinfo("Успех", "RDP подключение установлено!")
