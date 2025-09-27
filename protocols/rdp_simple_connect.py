@@ -2,7 +2,7 @@ import os
 import platform
 import subprocess
 
-def simple_rdp(ip: str, username: str, password: str) -> bool:
+def rdp_connect(ip: str, username: str, password: str) -> bool:
     """
     Простая функция RDP подключения
     """
