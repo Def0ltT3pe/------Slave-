@@ -7,7 +7,7 @@ class SSHHandler:
         self.is_connected = False
     
     def connect(self, host: str, username: str, password: str, port: int = 22) -> bool:
-        """Подключение к SSH серверу"""
+        # Подключение к SSH серверу
         try:
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -20,7 +20,7 @@ class SSHHandler:
             return False
     
     def execute_command(self, command: str) -> str:
-        """Выполнение команды на сервере"""
+        # Выполнение команды на сервере
         if not self.is_connected:
             return "Не подключено к серверу"
         
@@ -33,13 +33,13 @@ class SSHHandler:
             return f"Ошибка выполнения: {e}"
     
     def disconnect(self):
-        """Отключение от сервера"""
+        # Отключение
         if self.client:
             self.client.close()
         self.is_connected = False
 
 def ssh_connect(ip: str, login: str, password: str):
-    """Основная функция для подключения по SSH"""
+    # Основная функция
     ssh = SSHHandler()
     
     if ssh.connect(ip, login, password, 22):

@@ -6,7 +6,6 @@ import tkinter as tk
 from tkinter import filedialog
 
 def vnc_connect(ip: str, password: str = "", port: int = 5900):
-    """Запуск VNC Viewer с выбором пути к exe через диалоговое окно"""
     try:
         vnc_address = f"{ip}:{port}"
         
@@ -16,17 +15,17 @@ def vnc_connect(ip: str, password: str = "", port: int = 5900):
                 r"D:\VNCviewer\vncviewer.exe"
             ]
             
-            # Проверяем стандартные пути
+            # Проверка на стандартные стандартные пути
             vnc_path = None
             for path in vnc_paths:
                 if os.path.exists(path):
                     vnc_path = path
                     break
             
-            # Если не нашли по стандартным путям, запрашиваем у пользователя
+            # Запрос у пользователя
             if not vnc_path:
                 root = tk.Tk()
-                root.withdraw()  # Скрываем основное окно
+                root.withdraw()  # Скрываем основное окно (?)
                 
                 print("VNC Viewer не найден по стандартным путям. Пожалуйста, укажите путь к vncviewer.exe")
                 vnc_path = filedialog.askopenfilename(
@@ -45,11 +44,11 @@ def vnc_connect(ip: str, password: str = "", port: int = 5900):
             print(f"Подключение к {vnc_address}")
             return True
             
-        else:
-            # Для Linux/Mac
-            subprocess.Popen(["vncviewer", vnc_address])
-            print(f"VNC Viewer запущен: {vnc_address}")
-            return True
+#       else:
+#           # Для Linux/Mac
+#           subprocess.Popen(["vncviewer", vnc_address])
+#           print(f"VNC Viewer запущен: {vnc_address}")
+#           return True
         
     except Exception as e:
         print(f"Ошибка запуска VNC Viewer: {e}")
