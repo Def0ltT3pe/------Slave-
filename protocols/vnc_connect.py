@@ -2,9 +2,11 @@
 import subprocess
 import platform
 import os
+import tkinter as tk
+from tkinter import filedialog
 
 def vnc_connect(ip: str, password: str = "", port: int = 5900):
-    """Запуск VNC Viewer через полный путь к exe"""
+    """Запуск VNC Viewer с выбором пути к exe через диалоговое окно"""
     try:
         vnc_address = f"{ip}:{port}"
         
@@ -12,19 +14,36 @@ def vnc_connect(ip: str, password: str = "", port: int = 5900):
             # Пути к VNC Viewer в Windows
             vnc_paths = [
                 r"D:\VNCviewer\vncviewer.exe"
-#                r"C:\Program Files (x86)\RealVNC\VNC Viewer\vncviewer.exe",
-#                r"C:\Program Files\TigerVNC\vncviewer.exe",
             ]
             
+            # Проверяем стандартные пути
+            vnc_path = None
             for path in vnc_paths:
                 if os.path.exists(path):
-                    subprocess.Popen([path, vnc_address])
-                    print(f"VNC Viewer запущен: {path}")
-                    print(f"Подключение к {vnc_address}")
-                    return True
+                    vnc_path = path
+                    break
             
-            print("VNC Viewer не найден по стандартным путям")
-            return False
+            # Если не нашли по стандартным путям, запрашиваем у пользователя
+            if not vnc_path:
+                root = tk.Tk()
+                root.withdraw()  # Скрываем основное окно
+                
+                print("VNC Viewer не найден по стандартным путям. Пожалуйста, укажите путь к vncviewer.exe")
+                vnc_path = filedialog.askopenfilename(
+                    title="Выберите VNC Viewer (vncviewer.exe)",
+                    filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
+                )
+                root.destroy()
+                
+                if not vnc_path:  # Пользователь отменил выбор
+                    print("Путь к VNC Viewer не указан")
+                    return False
+            
+            # Запускаем VNC Viewer
+            subprocess.Popen([vnc_path, vnc_address])
+            print(f"VNC Viewer запущен: {vnc_path}")
+            print(f"Подключение к {vnc_address}")
+            return True
             
         else:
             # Для Linux/Mac

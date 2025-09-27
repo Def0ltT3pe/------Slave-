@@ -4,6 +4,7 @@ import threading
 import paramiko
 from scanner.scanner import get_open_ports
 from protocols.rdp_connect import rdp_connect
+from protocols.vnc_connect import vnc_connect
 
 class NetworkScanner:
     def __init__(self, root):
@@ -64,6 +65,10 @@ class NetworkScanner:
                                    command=self.connect_ssh, state="disabled")
         self.ssh_button.pack(side="left", padx=5)
         
+        self.vnc_button = ttk.Button(button_frame, text="Подключиться по VNC", 
+                                   command=self.connect_vnc, state="disabled")
+        self.vnc_button.pack(side="left", padx=5)
+        
         # Статус
         self.status_var = tk.StringVar(value="Готов к работе")
         status_label = ttk.Label(main_frame, textvariable=self.status_var, relief="sunken")
@@ -102,8 +107,10 @@ class NetworkScanner:
             self.result_text.insert(tk.END, "✓ Доступен RDP (порт 3389)\n")
         if 22 in open_ports:
             self.result_text.insert(tk.END, "✓ Доступен SSH (порт 22)\n")
+        if 5900 in open_ports:
+            self.result_text.insert(tk.END, "✓ Доступен VNC (порт 5900)\n")
             
-        if not (3389 in open_ports or 22 in open_ports):
+        if not (3389 in open_ports or 22 in open_ports or 5900 in open_ports):
             self.result_text.insert(tk.END, "✗ Нет доступных протоколов\n")
             
         self.status_var.set("Сканирование завершено")
@@ -117,15 +124,10 @@ class NetworkScanner:
         messagebox.showerror("Ошибка", f"Не удалось просканировать порты: {error}")
         
     def update_buttons(self):
-        if 3389 in self.open_ports:
-            self.rdp_button.config(state="normal")
-            self.ssh_button.config(state="normal")
-        elif 22 in self.open_ports:
-            self.rdp_button.config(state="disabled")
-            self.ssh_button.config(state="normal")
-        else:
-            self.rdp_button.config(state="disabled")
-            self.ssh_button.config(state="disabled")
+        # Активируем кнопки в зависимости от найденных портов
+        self.rdp_button.config(state="normal" if 3389 in self.open_ports else "disabled")
+        self.ssh_button.config(state="normal" if 22 in self.open_ports else "disabled")
+        self.vnc_button.config(state="normal" if 5900 in self.open_ports else "disabled")
             
     def connect_rdp(self):
         ip = self.ip_var.get().strip()
@@ -161,6 +163,25 @@ class NetworkScanner:
             
         self.status_var.set("Подключение SSH...")
         self.create_ssh_window(ip, login, password)
+        
+    def connect_vnc(self):
+        ip = self.ip_var.get().strip()
+        password = self.password_var.get().strip()
+        
+        if not ip:
+            messagebox.showerror("Ошибка", "Введите IP-адрес")
+            return
+            
+        self.status_var.set("Подключение VNC...")
+        
+        try:
+            # VNC обычно использует только пароль, логин не требуется
+            vnc_connect(ip, password)
+            self.status_var.set("VNC подключен")
+            # messagebox.showinfo("Успех", "VNC подключение запущено!")
+        except Exception as e:
+            self.status_var.set("Ошибка VNC")
+            messagebox.showerror("Ошибка", f"Ошибка VNC: {e}")
         
     def create_ssh_window(self, ip, login, password):
         ssh_window = tk.Toplevel(self.root)
