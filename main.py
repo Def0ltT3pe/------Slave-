@@ -32,10 +32,6 @@ def main():
     elif 22 in open_ports:
         print("\nЗапускаем SSH подключение...")
         ssh_connect(ip, login, password)
-    
-#   elif 80 in open_ports:
-#       print("\nЗапускаем HTTP подключение...")
-#       http_connect(ip)
     else:
         print("\nНет доступных протоколов")
 
